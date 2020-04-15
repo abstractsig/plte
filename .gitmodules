@@ -1,0 +1,9 @@
+[submodule "io_core"]
+	path = io_core
+	url = https://github.com/abstractsig/io_core.git
+[submodule "io_cpu"]
+	path = io_cpu
+	url = https://github.com/abstractsig/io_nrf52840.git
+[submodule "io_board"]
+	path = io_board
+	url = https://github.com/abstractsig/particle_boron.git
