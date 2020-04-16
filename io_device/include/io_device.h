@@ -231,10 +231,10 @@ static EVENT_DATA io_socket_constructor_t default_twi_constructor = {
 	.receive_pipe_length = 5,
 };
 
-
-nrf52_twi_slave_t oled_display = {
-	.implementation = &nrf52_twi_slave_implementation,
-	.address = def_io_u8_address (OLED_FEATHER_I2C_ADDRESS),
+io_media_remote_socket_t oled_display = {
+	decl_io_media_remote_socket (
+		def_io_u8_address (OLED_FEATHER_I2C_ADDRESS)
+	)
 };
 
 nrf52_twi_master_t twim0 = {
