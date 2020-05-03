@@ -155,6 +155,7 @@ EVENT_DATA nrf52_core_clock_t cpu_core_clock = {
 	.input = IO_CPU_CLOCK(&crystal_oscillator),
 };
 
+/*
 static nrf52_uart_t uart0 = {
 	.implementation = &nrf52_uart_implementation,
 	.address = io_any_address (),
@@ -170,35 +171,62 @@ static nrf52_uart_t uart0 = {
 	.cts_pin = def_nrf_gpio_null_pin(),
 
 };
+*/
 
-static EVENT_DATA io_socket_constructor_t console_uart_constructor = {
+static io_socket_t*
+uart0_socket (io_t *io) {
+	static nrf52_uart_t uart0 = {
+		.implementation = &nrf52_uart_implementation,
+		.address = io_any_address (),
+		.encoding = &io_text_encoding_implementation,
+		
+		.uart_registers = NRF_UARTE0,
+		.interrupt_number = UARTE0_UART0_IRQn,
+		.baud_rate = UARTE_BAUDRATE_BAUDRATE_Baud115200,
+		
+		.tx_pin = def_nrf_io_alternate_pin(0,6,0),
+		.rx_pin = def_nrf_io_alternate_pin(0,8,0),
+		.rts_pin = def_nrf_gpio_null_pin(),
+		.cts_pin = def_nrf_gpio_null_pin(),
+
+	};
+	return (io_socket_t*) &uart0;
+}
+
+static EVENT_DATA io_settings_t console_uart_settings = {
 	.encoding = IO_ENCODING_IMPLEMENATAION (&io_text_encoding_implementation),
 	.transmit_pipe_length = 18,
 	.receive_pipe_length = 128,
 };
 
-static EVENT_DATA io_socket_constructor_t default_uart_constructor = {
+static EVENT_DATA io_settings_t default_uart_settings = {
 	.encoding = IO_ENCODING_IMPLEMENATAION (&io_text_encoding_implementation),
 	.transmit_pipe_length = 5,
 	.receive_pipe_length = 128,
 };
 
-static nrf52_uart_t uart1 = {
-	.implementation = &nrf52_uart_implementation,
-	.address = io_any_address (),
-	.encoding = IO_ENCODING_IMPLEMENATAION (&io_text_encoding_implementation),
-	
-	.uart_registers = NRF_UARTE1,
-	.interrupt_number = UARTE1_IRQn,
-	.baud_rate = UARTE_BAUDRATE_BAUDRATE_Baud115200,
-	
-	.tx_pin = def_nrf_io_alternate_pin(1,2,0),
-	.rx_pin = def_nrf_io_alternate_pin(1,1,0),
-	.rts_pin = def_nrf_gpio_null_pin(),
-	.cts_pin = def_nrf_gpio_null_pin(),
+static io_socket_t*
+uart1_socket (io_t *io) {
+	static nrf52_uart_t uart1 = {
+		.implementation = &nrf52_uart_implementation,
+		.address = io_any_address (),
+		.encoding = IO_ENCODING_IMPLEMENATAION (&io_text_encoding_implementation),
+		
+		.uart_registers = NRF_UARTE1,
+		.interrupt_number = UARTE1_IRQn,
+		.baud_rate = UARTE_BAUDRATE_BAUDRATE_Baud115200,
+		
+		.tx_pin = def_nrf_io_alternate_pin(1,2,0),
+		.rx_pin = def_nrf_io_alternate_pin(1,1,0),
+		.rts_pin = def_nrf_gpio_null_pin(),
+		.cts_pin = def_nrf_gpio_null_pin(),
 
-};
+	};
+	
+	return (io_socket_t*) &uart1;
+}
 
+/*
 static nrf52_spi_t spi0 = {
 	.implementation = &nrf52_spi_implementation,
 	.encoding = NULL,
@@ -207,7 +235,37 @@ static nrf52_spi_t spi0 = {
 	.sclk_pin = def_nrf_io_alternate_pin(1,15,0),
 	.cs_pin = def_nrf_io_output_pin(0,31,NRF_GPIO_ACTIVE_LEVEL_LOW,GPIO_PIN_INACTIVE),
 };
+*/
 
+/*
+static io_socket_t*
+qspi_socket (io_t *io) {
+	static nrf52_qspi_t qspi = {
+		.implementation = &nrf52_qspi_implementation,
+		.address = io_any_address (),
+		.qspi_registers = NRF_QSPI,
+		.interrupt_number = QSPI_IRQn,
+		.expected_chip = {
+			.device = {
+				.manufacturer = SPI_FLASH_MACRONIX,
+				.type = 0x20,
+				.capacity = 0x16,
+			}
+		},
+		.number_of_physical_sectors = 16,// shorten for testing 1024,
+		.sector_size = 4096,
+		.page_size = 256,
+		.cs_pin = def_nrf_io_alternate_pin (0,17,3),
+		.sck_pin = def_nrf_io_alternate_pin (0,19,3),
+		.io0_pin = def_nrf_io_alternate_pin (0,20,3),
+		.io1_pin = def_nrf_io_alternate_pin (0,21,3),
+		.io2_pin = def_nrf_io_alternate_pin (0,22,3),
+		.io3_pin = def_nrf_io_alternate_pin (0,23,3),
+	};
+	return (io_socket_t*) &qspi;
+}
+
+*/
 nrf52_qspi_t qspi = {
 	.implementation = &nrf52_qspi_implementation,
 	.address = io_any_address (),
@@ -231,18 +289,36 @@ nrf52_qspi_t qspi = {
 	.io3_pin = def_nrf_io_alternate_pin (0,23,3),
 };
 
-static EVENT_DATA io_socket_constructor_t default_twi_constructor = {
+static EVENT_DATA io_settings_t default_twi_settings = {
 	.encoding = IO_ENCODING_IMPLEMENATAION (&io_twi_encoding_implementation),
 	.transmit_pipe_length = 5,
 	.receive_pipe_length = 5,
 };
 
-io_media_remote_socket_t oled_display = {
-	decl_io_media_remote_socket (
-		def_io_u8_address (OLED_FEATHER_I2C_ADDRESS)
-	)
-};
+io_socket_t*
+oled_display_slot (io_t *io) {
+	io_socket_t *socket = io_byte_memory_allocate (
+		io_get_byte_memory (io),sizeof(io_leaf_socket_t)
+	);
+	socket->implementation = &nrf52_twi_slave_implementation;
+	socket->address = def_io_u8_address (OLED_FEATHER_I2C_ADDRESS);
+	return socket;
+}
 
+io_socket_t*
+twi0_socket (io_t *io) {
+	static nrf52_twi_master_t twim0 = {
+		.implementation = &nrf52_twi_master_implementation,
+		.address = io_any_address (),
+		.maximum_speed = 400000,
+		.registers = NRF_TWI0,
+		.interrupt_number = SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQn,
+		.sda_pin = def_nrf_io_alternate_pin (0,26,GPIO_PIN_CNF_DRIVE_S0D1),
+		.scl_pin = def_nrf_io_alternate_pin (0,27,GPIO_PIN_CNF_DRIVE_S0D1),
+	};
+	return (io_socket_t*) &twim0;
+}
+/*
 nrf52_twi_master_t twim0 = {
 	.implementation = &nrf52_twi_master_implementation,
 	.address = io_any_address (),
@@ -252,6 +328,7 @@ nrf52_twi_master_t twim0 = {
 	.sda_pin = def_nrf_io_alternate_pin (0,26,GPIO_PIN_CNF_DRIVE_S0D1),
 	.scl_pin = def_nrf_io_alternate_pin (0,27,GPIO_PIN_CNF_DRIVE_S0D1),
 };
+*/
 
 void
 add_io_implementation_device_methods (io_implementation_t *io_i) {
@@ -276,12 +353,12 @@ static device_io_t dev_io = {
 };
 
 const socket_builder_t my_sockets[] = {
-	{USART0,			IO_SOCKET(&uart0),&console_uart_constructor,true,NULL},
-	{USART1,			IO_SOCKET(&uart1),&default_uart_constructor,false,NULL},
-	{SPI0,			IO_SOCKET(&spi0),NULL,false,NULL},
-	{QSPI_SOCKET,	IO_SOCKET(&qspi),NULL,false,NULL},
-	{OLED_SOCKET,	IO_SOCKET(&oled_display),NULL,false,BINDINGS({OLED_SOCKET,TWIM0_SOCKET},END_OF_BINDINGS)},
-	{TWIM0_SOCKET,	IO_SOCKET(&twim0),&default_twi_constructor,false,NULL},
+	{USART0,			uart0_socket,&console_uart_settings,true,NULL},
+	{USART1,			uart1_socket,&default_uart_settings,false,NULL},
+//	{SPI0,			IO_SOCKET(&spi0),NULL,false,NULL},
+//	{QSPI_SOCKET,	qspi_socket,NULL,false,NULL},
+//	{OLED_SOCKET,	IO_SOCKET(&oled_display),NULL,false,BINDINGS({OLED_SOCKET,TWIM0_SOCKET},END_OF_BINDINGS)},
+//	{TWIM0_SOCKET,	IO_SOCKET(&twim0),&default_twi_settings,false,NULL},
 };
 
 io_t*
@@ -301,15 +378,16 @@ initialise_device_io (void) {
 
 	io_set_pin_to_output(io,LED1);
 
-	io_i.value_implementation = mk_string_hash_table (dev_io.bm,21);
-	add_core_value_implementations_to_hash (io_i.value_implementation);
+	io_i.value_implementation_map = mk_string_hash_table (dev_io.bm,21);
+	add_core_value_implementations_to_hash (io_i.value_implementation_map);
 	
 	dev_io.tasks = mk_io_value_pipe (dev_io.bm,3);
 
 	dev_io.prbs_state[0] = io_get_random_u32(io);
 
 	memset (dev_io.sockets,0,sizeof(io_socket_t*) * NUMBER_OF_IO_SOCKETS);
-	add_io_sockets_to_device (io,dev_io.sockets,my_sockets,SIZEOF(my_sockets));
+//	add_io_sockets_to_device (io,dev_io.sockets,my_sockets,SIZEOF(my_sockets));
+	build_io_sockets ((io_t*) io,dev_io.sockets,my_sockets,SIZEOF(my_sockets));
 	
 	return io;
 }

@@ -42,15 +42,19 @@ LINK_FLAGS = $(TARGET_FLAGS) \
 #
 #
 OBJECTS = main.o test.o
-DEPENDS = $(IO_DIR)/*.h \
+DEPENDS = \
+	$(IO_DIR)/*.h \
+	$(COMPONENTS_DIR)/sockets/*.h \
+	$(COMPONENTS_DIR)/layers/*.h \
 	$(CPU_DIR)/*.h \
 	$(CPU_DIR)/cmsis/*.h \
-	$(DEVICE_DIR)/include/*.h \
 	$(BOARD_DIR)/*.h \
+	$(DEVICE_DIR)/include/*.h \
 	makefile
 	
 INCLUDE_DIRS = -I$(DEVICE_DIR)/include \
 	-I$(IO_DIR) \
+	-I$(COMPONENTS_DIR) \
 	-I$(CPU_DIR) \
 	-I$(CPU_DIR)/cmsis \
 	-I$(BOARD_DIR)

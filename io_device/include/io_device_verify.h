@@ -8,6 +8,13 @@
 #include <verify_io.h>
 #include <nrf52_qspi_verify.h>
 
+TEST_BEGIN(test_io_device_sockets_1) {
+	VERIFY (io_get_socket (TEST_IO,USART0) != NULL,NULL);
+	VERIFY (io_get_socket (TEST_IO,USART1) != NULL,NULL);
+//	VERIFY (io_get_socket (TEST_IO,SPI0) != NULL,NULL);
+}
+TEST_END
+
 TEST_BEGIN(test_io_twi_master_socket_1) {
 	io_socket_t *twi = io_get_socket (TEST_IO,TWIM0_SOCKET);
 	
@@ -16,13 +23,6 @@ TEST_BEGIN(test_io_twi_master_socket_1) {
 		
 		io_socket_close (twi);
 	}
-}
-TEST_END
-
-TEST_BEGIN(test_io_device_sockets_1) {
-	VERIFY (io_get_socket (TEST_IO,USART0) != NULL,NULL);
-	VERIFY (io_get_socket (TEST_IO,USART1) != NULL,NULL);
-	VERIFY (io_get_socket (TEST_IO,SPI0) != NULL,NULL);
 }
 TEST_END
 
@@ -37,7 +37,7 @@ void
 io_device_unit_test (V_unit_test_t *unit) {
 	static V_test_t const tests[] = {
 		test_io_device_sockets_1,
-		test_io_twi_master_socket_1,
+//		test_io_twi_master_socket_1,
 		0
 	};
 	unit->name = "io device";
