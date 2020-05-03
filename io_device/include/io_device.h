@@ -171,6 +171,12 @@ static nrf52_uart_t uart0 = {
 
 };
 
+static EVENT_DATA io_socket_constructor_t console_uart_constructor = {
+	.encoding = IO_ENCODING_IMPLEMENATAION (&io_text_encoding_implementation),
+	.transmit_pipe_length = 18,
+	.receive_pipe_length = 128,
+};
+
 static EVENT_DATA io_socket_constructor_t default_uart_constructor = {
 	.encoding = IO_ENCODING_IMPLEMENATAION (&io_text_encoding_implementation),
 	.transmit_pipe_length = 5,
@@ -270,7 +276,7 @@ static device_io_t dev_io = {
 };
 
 const socket_builder_t my_sockets[] = {
-	{USART0,			IO_SOCKET(&uart0),&default_uart_constructor,true,NULL},
+	{USART0,			IO_SOCKET(&uart0),&console_uart_constructor,true,NULL},
 	{USART1,			IO_SOCKET(&uart1),&default_uart_constructor,false,NULL},
 	{SPI0,			IO_SOCKET(&spi0),NULL,false,NULL},
 	{QSPI_SOCKET,	IO_SOCKET(&qspi),NULL,false,NULL},
