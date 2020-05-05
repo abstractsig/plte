@@ -47,9 +47,9 @@ enum {
 	USART1,
 	SPI0,
 	QSPI_SOCKET,
-	TWIM0_SOCKET,
 
-	OLED_SOCKET,
+	RADIO_SOCKET,
+	RADIO_DLC_SOCKET,
 	
 	NUMBER_OF_IO_SOCKETS // capture the socket count for this device
 };
@@ -318,17 +318,23 @@ twi0_socket (io_t *io) {
 	};
 	return (io_socket_t*) &twim0;
 }
-/*
-nrf52_twi_master_t twim0 = {
-	.implementation = &nrf52_twi_master_implementation,
-	.address = io_any_address (),
-	.maximum_speed = 400000,
-	.registers = NRF_TWI0,
-	.interrupt_number = SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQn,
-	.sda_pin = def_nrf_io_alternate_pin (0,26,GPIO_PIN_CNF_DRIVE_S0D1),
-	.scl_pin = def_nrf_io_alternate_pin (0,27,GPIO_PIN_CNF_DRIVE_S0D1),
+
+static EVENT_DATA io_settings_t radio_constructor = {
+	.encoding = &nrf52_radio_encoding_implementation,
+	.transmit_pipe_length = 5,
+	.receive_pipe_length = 5,
 };
-*/
+
+static io_socket_t*
+radio_socket (io_t *io) {
+	static nrf52_radio_t radio_socket = {
+		.implementation = &nrf52_radio_socket_implementation,
+		.address = io_invalid_address (),
+		.registers = NRF_RADIO,
+		.interrupt_number = RADIO_IRQn,
+	};
+	return (io_socket_t*) &radio_socket;
+}
 
 void
 add_io_implementation_device_methods (io_implementation_t *io_i) {
@@ -353,12 +359,9 @@ static device_io_t dev_io = {
 };
 
 const socket_builder_t my_sockets[] = {
-	{USART0,			uart0_socket,&console_uart_settings,true,NULL},
-	{USART1,			uart1_socket,&default_uart_settings,false,NULL},
-//	{SPI0,			IO_SOCKET(&spi0),NULL,false,NULL},
-//	{QSPI_SOCKET,	qspi_socket,NULL,false,NULL},
-//	{OLED_SOCKET,	IO_SOCKET(&oled_display),NULL,false,BINDINGS({OLED_SOCKET,TWIM0_SOCKET},END_OF_BINDINGS)},
-//	{TWIM0_SOCKET,	IO_SOCKET(&twim0),&default_twi_settings,false,NULL},
+	{USART0,					uart0_socket,&console_uart_settings,true,NULL},
+	{USART1,					uart1_socket,&default_uart_settings,false,NULL},
+	{RADIO_SOCKET,			radio_socket,&radio_constructor,false,NULL},
 };
 
 io_t*
