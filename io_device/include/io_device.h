@@ -174,7 +174,7 @@ static nrf52_uart_t uart0 = {
 */
 
 static io_socket_t*
-uart0_socket (io_t *io) {
+uart0_socket (io_t *io,io_address_t address) {
 	static nrf52_uart_t uart0 = {
 		.implementation = &nrf52_uart_implementation,
 		.address = io_any_address (),
@@ -206,7 +206,7 @@ static EVENT_DATA io_settings_t default_uart_settings = {
 };
 
 static io_socket_t*
-uart1_socket (io_t *io) {
+uart1_socket (io_t *io,io_address_t address) {
 	static nrf52_uart_t uart1 = {
 		.implementation = &nrf52_uart_implementation,
 		.address = io_any_address (),
@@ -326,7 +326,7 @@ static EVENT_DATA io_settings_t radio_constructor = {
 };
 
 static io_socket_t*
-radio_socket (io_t *io) {
+radio_socket (io_t *io,io_address_t address) {
 	static nrf52_radio_t radio_socket = {
 		.implementation = &nrf52_radio_socket_implementation,
 		.address = io_invalid_address (),
@@ -359,9 +359,9 @@ static device_io_t dev_io = {
 };
 
 const socket_builder_t my_sockets[] = {
-	{USART0,					uart0_socket,&console_uart_settings,true,NULL},
-	{USART1,					uart1_socket,&default_uart_settings,false,NULL},
-	{RADIO_SOCKET,			radio_socket,&radio_constructor,false,NULL},
+	{USART0,					uart0_socket,io_invalid_address(),&console_uart_settings,true,NULL},
+	{USART1,					uart1_socket,io_invalid_address(),&default_uart_settings,false,NULL},
+	{RADIO_SOCKET,			radio_socket,io_invalid_address(),&radio_constructor,false,NULL},
 };
 
 io_t*
