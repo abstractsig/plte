@@ -27,6 +27,7 @@
 #define io_device_H_
 #include <io_board.h>
 #include <io_graphics.h>
+#include <sockets/io_beacon_socket.h>
 
 //
 // allocate GPIOTE channels (0..7)
@@ -158,7 +159,7 @@ EVENT_DATA nrf52_core_clock_t cpu_core_clock = {
 /*
 static nrf52_uart_t uart0 = {
 	.implementation = &nrf52_uart_implementation,
-	.address = io_any_address (),
+	.address = io_invalid_address (),
 	.encoding = IO_ENCODING_IMPLEMENATAION (&io_text_encoding_implementation),
 	
 	.uart_registers = NRF_UARTE0,
@@ -177,7 +178,7 @@ static io_socket_t*
 uart0_socket (io_t *io,io_address_t address) {
 	static nrf52_uart_t uart0 = {
 		.implementation = &nrf52_uart_implementation,
-		.address = io_any_address (),
+		.address = io_invalid_address (),
 		.encoding = &io_text_encoding_implementation,
 		
 		.uart_registers = NRF_UARTE0,
@@ -209,7 +210,7 @@ static io_socket_t*
 uart1_socket (io_t *io,io_address_t address) {
 	static nrf52_uart_t uart1 = {
 		.implementation = &nrf52_uart_implementation,
-		.address = io_any_address (),
+		.address = io_invalid_address (),
 		.encoding = IO_ENCODING_IMPLEMENATAION (&io_text_encoding_implementation),
 		
 		.uart_registers = NRF_UARTE1,
@@ -242,7 +243,7 @@ static io_socket_t*
 qspi_socket (io_t *io) {
 	static nrf52_qspi_t qspi = {
 		.implementation = &nrf52_qspi_implementation,
-		.address = io_any_address (),
+		.address = io_invalid_address (),
 		.qspi_registers = NRF_QSPI,
 		.interrupt_number = QSPI_IRQn,
 		.expected_chip = {
@@ -268,7 +269,7 @@ qspi_socket (io_t *io) {
 */
 nrf52_qspi_t qspi = {
 	.implementation = &nrf52_qspi_implementation,
-	.address = io_any_address (),
+	.address = io_invalid_address (),
 	.qspi_registers = NRF_QSPI,
 	.interrupt_number = QSPI_IRQn,
 	.expected_chip = {
@@ -290,7 +291,7 @@ nrf52_qspi_t qspi = {
 };
 
 static EVENT_DATA io_settings_t default_twi_settings = {
-	.encoding = IO_ENCODING_IMPLEMENATAION (&io_twi_encoding_implementation),
+	.encoding = &io_twi_encoding_implementation,
 	.transmit_pipe_length = 5,
 	.receive_pipe_length = 5,
 };
@@ -298,7 +299,7 @@ static EVENT_DATA io_settings_t default_twi_settings = {
 io_socket_t*
 oled_display_slot (io_t *io) {
 	io_socket_t *socket = io_byte_memory_allocate (
-		io_get_byte_memory (io),sizeof(io_leaf_socket_t)
+		io_get_byte_memory (io),sizeof(io_adapter_address_t)
 	);
 	socket->implementation = &nrf52_twi_slave_implementation;
 	socket->address = def_io_u8_address (OLED_FEATHER_I2C_ADDRESS);
@@ -309,7 +310,7 @@ io_socket_t*
 twi0_socket (io_t *io) {
 	static nrf52_twi_master_t twim0 = {
 		.implementation = &nrf52_twi_master_implementation,
-		.address = io_any_address (),
+		.address = io_invalid_address (),
 		.maximum_speed = 400000,
 		.registers = NRF_TWI0,
 		.interrupt_number = SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQn,
