@@ -50,7 +50,7 @@ enum {
 	QSPI_SOCKET,
 
 	RADIO_SOCKET,
-	RADIO_DLC_SOCKET,
+	RADIO_BEACON_SOCKET,
 	
 	NUMBER_OF_IO_SOCKETS // capture the socket count for this device
 };
@@ -359,10 +359,16 @@ static device_io_t dev_io = {
 	.prbs_state = { 0x8764000b, 0xf542d2d3, 0x6fa035c3, 0x77f2db5b },
 };
 
+const io_settings_t bus = {
+	.make = NULL,
+	.notify = NULL,
+};
+
 const socket_builder_t my_sockets[] = {
-	{USART0,					uart0_socket,io_invalid_address(),&console_uart_settings,true,NULL},
-	{USART1,					uart1_socket,io_invalid_address(),&default_uart_settings,false,NULL},
-	{RADIO_SOCKET,			radio_socket,io_invalid_address(),&radio_constructor,false,NULL},
+	{USART0,						uart0_socket,io_invalid_address(),&console_uart_settings,true,NULL},
+	{USART1,						uart1_socket,io_invalid_address(),&default_uart_settings,false,NULL},
+	{RADIO_BEACON_SOCKET,	allocate_io_beacon_socket,IO_BEACON_LAYER_ID,&bus,false,BINDINGS({RADIO_BEACON_SOCKET,RADIO_SOCKET},END_OF_BINDINGS)},
+	{RADIO_SOCKET,				radio_socket,io_invalid_address(),&radio_constructor,false,NULL},
 };
 
 io_t*
