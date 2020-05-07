@@ -299,7 +299,7 @@ static EVENT_DATA io_settings_t default_twi_settings = {
 io_socket_t*
 oled_display_slot (io_t *io) {
 	io_socket_t *socket = io_byte_memory_allocate (
-		io_get_byte_memory (io),sizeof(io_adapter_address_t)
+		io_get_byte_memory (io),sizeof(io_adapter_socket_t)
 	);
 	socket->implementation = &nrf52_twi_slave_implementation;
 	socket->address = def_io_u8_address (OLED_FEATHER_I2C_ADDRESS);
