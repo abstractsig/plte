@@ -360,6 +360,7 @@ static device_io_t dev_io = {
 };
 
 const io_settings_t bus = {
+	.receive_pipe_length = 3,
 	.make = NULL,
 	.notify = NULL,
 };
