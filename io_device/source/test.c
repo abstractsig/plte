@@ -32,6 +32,12 @@ test_device (io_t *io,vref_t r_led) {
 	};
 
 	V_start_tests(&runner);
+	io_printf (
+		io,"%-*s%-*sstart\n",
+		DBP_FIELD1,DEVICE_NAME,
+		DBP_FIELD2,"self test"
+	);
+	flush_io_printf (io);
 
 	run_ut_io_core (&runner);
 	run_ut_io_dlc_socket (&runner);

@@ -30,8 +30,8 @@ main (void) {
 		io_beacon_socket_set_interval (radio,millisecond_time(1000));
 		
 		io_printf (
-			io,"%s%-*s%-*scomplete\n",
-			(first_run)? "":"\n",DBP_FIELD1,DEVICE_NAME,DBP_FIELD2,"startup"
+			io,"%-*s%-*scomplete\n",
+			DBP_FIELD1,DEVICE_NAME,DBP_FIELD2,"startup"
 		);
 
 		io_socket_open (radio,IO_SOCKET_OPEN_CONNECT);
