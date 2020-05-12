@@ -337,12 +337,18 @@ radio_socket (io_t *io,io_address_t address) {
 	return (io_socket_t*) &radio_socket;
 }
 
+static bool
+lookup_shared_key (io_t *io,io_uid_t const *uid,io_authentication_key_t *key) {
+	return false;
+}
+
 void
 add_io_implementation_device_methods (io_implementation_t *io_i) {
 	add_io_implementation_board_methods (io_i);
 
 	io_i->get_core_clock = nrf_get_core_clock;
 	io_i->get_socket = io_device_get_socket;
+	io_i->get_shared_key = lookup_shared_key;
 }
 
 static io_implementation_t io_i = {
