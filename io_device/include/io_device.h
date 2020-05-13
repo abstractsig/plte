@@ -351,6 +351,13 @@ add_io_implementation_device_methods (io_implementation_t *io_i) {
 	io_i->get_shared_key = lookup_shared_key;
 }
 
+io_implementation_t plite_io_implementation = {
+	SPECIALISE_IO_IMPLEMENTATION(NULL)
+	
+};
+
+
+
 static io_implementation_t io_i = {
 	0
 };

@@ -18,6 +18,8 @@ main (void) {
 	io_t *io = initialise_device_io ();
 	bool first_run = io_is_first_run (io);
 	
+	io->log_level = IO_INFO_LOG_LEVEL;
+	
 	if (first_run) {
 		if (!test_device (io,cr_NIL)) {
 			io_printf(io,"\n"DEVICE_NAME" device test failed\n");
@@ -33,7 +35,8 @@ main (void) {
 			io,"%-*s%-*scomplete\n",
 			DBP_FIELD1,DEVICE_NAME,DBP_FIELD2,"startup"
 		);
-
+		
+		//io->log_level = IO_WARNING_LOG_LEVEL;
 		io_socket_open (radio,IO_SOCKET_OPEN_CONNECT);
 
 		while (1) {
