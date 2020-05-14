@@ -100,11 +100,5 @@ SECTIONS {
 		ld_end_of_static_ram_allocations = .;
 	} >RAM
 
-	/DISCARD/ : {
-		libc.a ( * )
-		libm.a ( * )
-		libgcc.a ( * )
-	}
-
 	.ARM.attributes 0 : { *(.ARM.attributes) }
 }
