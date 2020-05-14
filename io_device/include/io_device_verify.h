@@ -5,8 +5,8 @@
 #ifndef io_device_verify_H_
 #define io_device_verify_H_
 #ifdef IMPLEMENT_VERIFY_IO_DEVICE
-#include <verify_io.h>
-#include <nrf52_qspi_verify.h>
+#include <io_verify.h>
+#include <io_device.h>
 
 TEST_BEGIN(test_io_device_sockets_1) {
 	VERIFY (io_get_socket (TEST_IO,USART0) != NULL,NULL);
@@ -34,13 +34,15 @@ io_device_unit_test (V_unit_test_t *unit) {
 	unit->teardown = teardown_io_device_unit_test;
 }
 
-#define IO_DEVICE_UNIT_TESTS	\
-	io_device_unit_test,	\
-	IO_QSPI_UNIT_TEST	\
-	IO_GRAPHICS_UNIT_TESTS\
-	/**/
-#else
-# define IO_DEVICE_UNIT_TESTS
+void
+run_ut_io_device (V_runner_t *runner) {
+	static const unit_test_t test_set[] = {
+		io_device_unit_test,
+		0
+	};
+	V_run_unit_tests(runner,test_set);
+}
+
 #endif /* IMPLEMENT_VERIFY_IO_DEVICE */
 #endif
 /*

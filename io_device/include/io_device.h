@@ -29,6 +29,17 @@
 #include <io_graphics.h>
 #include <sockets/io_beacon_socket.h>
 
+io_cpu_clock_pointer_t io_device_get_core_clock (io_t*);
+io_socket_t* io_device_get_socket (io_t*,int32_t);
+
+#define SPECIALISE_IO_DEVICE_IMPLEMENTATION(S) \
+	SPECIALISE_IO_BOARD_IMPLEMENTATION(S) \
+	.get_core_clock = io_device_get_core_clock,\
+	.get_socket = io_device_get_socket,\
+	.get_shared_key = lookup_shared_key,\
+	/**/
+
+
 //
 // allocate GPIOTE channels (0..7)
 //
@@ -106,13 +117,13 @@ register_io_value_memory (io_value_memory_t *vm) {
 	}
 }
 
-static io_cpu_clock_pointer_t
-nrf_get_core_clock (io_t *io) {
+io_cpu_clock_pointer_t
+io_device_get_core_clock (io_t *io) {
 	extern EVENT_DATA nrf52_core_clock_t cpu_core_clock;
 	return IO_CPU_CLOCK(&cpu_core_clock);
 }
 
-static io_socket_t*
+io_socket_t*
 io_device_get_socket (io_t *io,int32_t handle) {
 	if (handle >= 0 && handle < NUMBER_OF_IO_SOCKETS) {
 		device_io_t *this = (device_io_t*) io;
@@ -342,24 +353,12 @@ lookup_shared_key (io_t *io,io_uid_t const *uid,io_authentication_key_t *key) {
 	return false;
 }
 
-void
-add_io_implementation_device_methods (io_implementation_t *io_i) {
-	add_io_implementation_board_methods (io_i);
-
-	io_i->get_core_clock = nrf_get_core_clock;
-	io_i->get_socket = io_device_get_socket;
-	io_i->get_shared_key = lookup_shared_key;
-}
-
 io_implementation_t plite_io_implementation = {
-	SPECIALISE_IO_IMPLEMENTATION(NULL)
-	
+	SPECIALISE_IO_DEVICE_IMPLEMENTATION(NULL)
 };
 
-
-
 static io_implementation_t io_i = {
-	0
+	SPECIALISE_IO_DEVICE_IMPLEMENTATION(NULL)
 };
 
 static device_io_t dev_io = {
@@ -389,14 +388,13 @@ io_t*
 initialise_device_io (void) {
 	io_t *io = (io_t*) &dev_io;
 	
-	add_io_implementation_device_methods (&io_i);
 	initialise_io (io,&io_i);
 
 	dev_io.bm = initialise_io_byte_memory (io,&heap_byte_memory,UMM_BLOCK_SIZE_8);
 	dev_io.vm = mk_umm_io_value_memory (io,UMM_VALUE_MEMORY_HEAP_SIZE,STVM);
 	register_io_value_memory (dev_io.vm);
 
-	initialise_board_io (io);
+	initialise_io_board (io);
 
 	io_cpu_clock_start (io,io_get_core_clock(io));
 
