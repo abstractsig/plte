@@ -12,7 +12,7 @@
 #define IMPLEMENT_VERIFY_IO_BEACON_SOCKET
 #define IMPLEMENT_VERIFY_IO_CPU
 #define IMPLEMENT_VERIFY_IO_DEVICE
-#include <sockets/io_beacon_socket.h>
+#include <xnet/io_beacon_socket.h>
 #include <io_verify_core_math.h>
 #include <io_verify_core_containers.h>
 #include <io_verify_core_security.h>
