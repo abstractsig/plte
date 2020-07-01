@@ -390,7 +390,7 @@ initialise_device_io (void) {
 	
 	initialise_io (io,&io_i);
 
-	dev_io.bm = initialise_io_byte_memory (io,&heap_byte_memory,UMM_BLOCK_SIZE_8);
+	dev_io.bm = initialise_io_byte_memory (io,&heap_byte_memory,UMM_BLOCK_SIZE_1N);
 	dev_io.vm = mk_umm_io_value_memory (io,UMM_VALUE_MEMORY_HEAP_SIZE,STVM);
 	register_io_value_memory (dev_io.vm);
 

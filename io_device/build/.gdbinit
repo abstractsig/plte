@@ -34,7 +34,7 @@ end
 #
 #------------------------------------------------------------------------------
 define test 
-	break verify_io.h:94
+	break io_verify.h:93
 end
 
 set confirm off
