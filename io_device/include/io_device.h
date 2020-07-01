@@ -1,6 +1,6 @@
 /*
  *
- * pinky io device
+ * plte io device
  *
  *                        .--------------------.
  *                  Reset |16 0.18             |
