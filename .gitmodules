@@ -11,5 +11,5 @@
 	path = io_components
 	url = https://github.com/abstractsig/io_components.git
 [submodule "b"]
-	path = b
+	path = bbt_components
 	url = https://brucebiotech:NiceAvocados42@github.com/brucebiotech/io_components.git
