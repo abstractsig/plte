@@ -14,6 +14,7 @@ IO_DIR = ../../io_core
 CPU_DIR = ../../io_cpu
 BOARD_DIR = ../../io_board
 COMPONENTS_DIR = ../../io_components
+BBT_DIR = ../../bbt_components
 DEVICE_DIR = ..
 DEVICE_SOURCE_DIR = $(DEVICE_DIR)/source
 #
@@ -51,7 +52,7 @@ LINK_FLAGS = $(TARGET_FLAGS) \
 OBJECTS = main.o test.o
 DEPENDS = \
 	$(IO_DIR)/*.h \
-	$(COMPONENTS_DIR)/sockets/*.h \
+	$(BBT_DIR)/xnet/*.h \
 	$(COMPONENTS_DIR)/layers/*.h \
 	$(CPU_DIR)/*.h \
 	$(CPU_DIR)/cmsis/*.h \
@@ -61,6 +62,7 @@ DEPENDS = \
 	
 INCLUDE_DIRS = -I$(DEVICE_DIR)/include \
 	-I$(IO_DIR) \
+	-I$(BBT_DIR)\
 	-I$(COMPONENTS_DIR) \
 	-I$(CPU_DIR) \
 	-I$(CPU_DIR)/cmsis \
