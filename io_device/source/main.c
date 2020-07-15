@@ -24,6 +24,8 @@ main (void) {
 		if (!test_device (io,cr_NIL)) {
 			io_printf(io,"\n"DEVICE_NAME" device test failed\n");
 			return 1;
+		} else {
+			io_clear_first_run (io);
 		}
 	}
 
@@ -31,10 +33,7 @@ main (void) {
 		io_socket_t *radio = io_get_socket (io,RADIO_BEACON_SOCKET);
 		io_beacon_socket_set_interval (radio,millisecond_time(1000));
 		
-		io_printf (
-			io,"%-*s%-*scomplete\n",
-			DBP_FIELD1,DEVICE_NAME,DBP_FIELD2,"startup"
-		);
+		io_log_startup_message (io,IO_INFO_LOG_LEVEL);
 		
 		//io->log_level = IO_WARNING_LOG_LEVEL;
 		io_socket_open (radio,IO_SOCKET_OPEN_CONNECT);

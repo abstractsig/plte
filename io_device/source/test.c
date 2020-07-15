@@ -51,7 +51,8 @@ test_device (io_t *io,vref_t r_led) {
 	run_ut_io_core_sockets (&runner);
 	run_ut_io_dlc_socket (&runner);
 	run_ut_io_beacon_socket (&runner);
-
+	run_ut_io_async (&runner);
+	
 	print_unit_test_report (&runner);
 	return runner.total_failed == 0;
 }

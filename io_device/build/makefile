@@ -30,12 +30,14 @@ CC = $(TOOL_PREFIX)gcc
 #GENERATE_UID = 1
 OPTIMISATION = -O0
 WARNINGS = -Wall
-DEFS = -DDEVICE_NAME="\"$(APPLICATION_NAME)\"" -DSTATIC_UID=$(APPLICATION_UID)
+DEFS = -DSTATIC_UID=$(APPLICATION_UID)
 TARGET_FLAGS = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb 
 GENERIC_FLAGS = -fomit-frame-pointer -ffunction-sections -fdata-sections -nostdlib -nostartfiles -std=c99 -g3 -Wfatal-errors
+DEPENDANCIES = -MMD -MF $(@F).d
 COMPILE_FLAGS = $(DEFS) \
 	$(GENERATE_UID) \
 	$(TARGET_FLAGS) \
+	$(DEPENDANCIES) \
 	$(GENERIC_FLAGS) \
 	$(OPTIMISATION) \
 	$(WARNINGS) \
@@ -50,15 +52,7 @@ LINK_FLAGS = $(TARGET_FLAGS) \
 #
 #
 OBJECTS = main.o test.o
-DEPENDS = \
-	$(IO_DIR)/*.h \
-	$(BBT_DIR)/xnet/*.h \
-	$(COMPONENTS_DIR)/layers/*.h \
-	$(CPU_DIR)/*.h \
-	$(CPU_DIR)/cmsis/*.h \
-	$(BOARD_DIR)/*.h \
-	$(DEVICE_DIR)/include/*.h \
-	makefile
+DEPENDS = makefile
 	
 INCLUDE_DIRS = -I$(DEVICE_DIR)/include \
 	-I$(IO_DIR) \
@@ -82,8 +76,10 @@ size:
 	@$(TOOL_PREFIX)size.exe $(APPLICATION_NAME).elf
 	
 clean:
-	rm -rf *.o *.map *.elf
+	rm -rf *.o *.d *.map *.elf
 	
 .PHONY: all clean
+
+-include $(wildcard *.d)
 
 

@@ -29,17 +29,6 @@
 #include <io_graphics.h>
 #include <xnet/io_beacon_socket.h>
 
-io_cpu_clock_pointer_t io_device_get_core_clock (io_t*);
-io_socket_t* io_device_get_socket (io_t*,int32_t);
-
-#define SPECIALISE_IO_DEVICE_IMPLEMENTATION(S) \
-	SPECIALISE_IO_BOARD_IMPLEMENTATION(S) \
-	.get_core_clock = io_device_get_core_clock,\
-	.get_socket = io_device_get_socket,\
-	.get_shared_key = lookup_shared_key,\
-	/**/
-
-
 //
 // allocate GPIOTE channels (0..7)
 //
@@ -65,6 +54,9 @@ enum {
 	
 	NUMBER_OF_IO_SOCKETS // capture the socket count for this device
 };
+
+#include <lattice/io_lattice_socket.h>
+
 
 typedef struct PACK_STRUCTURE device_io_t {
 	NRF52840_IO_CPU_STRUCT_MEMBERS
@@ -348,17 +340,42 @@ radio_socket (io_t *io,io_address_t address) {
 	return (io_socket_t*) &radio_socket;
 }
 
+const io_settings_t bus = {
+	.receive_pipe_length = 3,
+	.make = NULL,
+	.notify = NULL,
+};
+
+static void
+device_log (io_t *io,char const *fmt,va_list va) {
+	io_socket_t *print = io_get_socket (io,IO_PRINTF_SOCKET);
+	if (print) {
+		io_encoding_t *msg = io_socket_new_message (print);
+		io_encoding_print (msg,fmt,va);
+		io_socket_send_message (print,msg);
+	}
+}
+
+void
+flush_device_log (io_t *io) {
+	io_socket_t *print = io_get_socket (io,IO_PRINTF_SOCKET);
+	if (print) {
+		io_socket_flush (print);
+	}
+}
+
 static bool
 lookup_shared_key (io_t *io,io_uid_t const *uid,io_authentication_key_t *key) {
 	return false;
 }
 
-io_implementation_t plite_io_implementation = {
-	SPECIALISE_IO_DEVICE_IMPLEMENTATION(NULL)
-};
-
-static io_implementation_t io_i = {
-	SPECIALISE_IO_DEVICE_IMPLEMENTATION(NULL)
+static io_implementation_t device_io_implementation = {
+	SPECIALISE_IO_BOARD_IMPLEMENTATION(NULL)
+	.get_core_clock = io_device_get_core_clock,
+	.get_socket = io_device_get_socket,
+	.get_shared_key = lookup_shared_key,
+	.log = device_log,
+	.flush_log = flush_device_log,
 };
 
 static device_io_t dev_io = {
@@ -371,11 +388,6 @@ static device_io_t dev_io = {
 	.prbs_state = { 0x8764000b, 0xf542d2d3, 0x6fa035c3, 0x77f2db5b },
 };
 
-const io_settings_t bus = {
-	.receive_pipe_length = 3,
-	.make = NULL,
-	.notify = NULL,
-};
 
 const socket_builder_t my_sockets[] = {
 	{USART0,						uart0_socket,io_invalid_address(),&console_uart_settings,true,NULL},
@@ -388,7 +400,7 @@ io_t*
 initialise_device_io (void) {
 	io_t *io = (io_t*) &dev_io;
 	
-	initialise_io (io,&io_i);
+	initialise_io (io,&device_io_implementation);
 
 	dev_io.bm = initialise_io_byte_memory (io,&heap_byte_memory,UMM_BLOCK_SIZE_1N);
 	dev_io.vm = mk_umm_io_value_memory (io,UMM_VALUE_MEMORY_HEAP_SIZE,STVM);
@@ -400,15 +412,14 @@ initialise_device_io (void) {
 
 	io_set_pin_to_output(io,LED1);
 
-	io_i.value_implementation_map = mk_string_hash_table (dev_io.bm,21);
-	add_core_value_implementations_to_hash (io_i.value_implementation_map);
+	device_io_implementation.value_implementation_map = mk_string_hash_table (dev_io.bm,21);
+	add_core_value_implementations_to_hash (device_io_implementation.value_implementation_map);
 	
 	dev_io.tasks = mk_io_value_pipe (dev_io.bm,3);
 
 	dev_io.prbs_state[0] = io_get_random_u32(io);
 
 	memset (dev_io.sockets,0,sizeof(io_socket_t*) * NUMBER_OF_IO_SOCKETS);
-//	add_io_sockets_to_device (io,dev_io.sockets,my_sockets,SIZEOF(my_sockets));
 	build_io_sockets ((io_t*) io,dev_io.sockets,my_sockets,SIZEOF(my_sockets));
 	
 	return io;

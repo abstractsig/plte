@@ -14,6 +14,8 @@
 #define STVM 					0
 #define USE_LIBC
 
+#define DEVICE_NAME "plte"
+
 //
 // compiler specific stuff
 //
